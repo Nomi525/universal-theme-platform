@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Branch {
+  id           Int             @id @default(autoincrement())
+  name         String
+  isMain       Boolean         @default(false)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  themes       Theme[]
+  snapshots    ThemeSnapshot[]
+  StoreSetting StoreSetting[]
+}
+
+model Theme {
+  id        Int      @id @default(autoincrement())
+  branchId  Int
+  name      String
+  shortDesc String?
+  author    String?
+  version   String?  @default("1.0.0")
+  image     String?
+  isCurrent Boolean  @default(false) // active theme for the branch editor
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  branch        Branch               @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  blocks        ThemeDesignElement[]
+  ThemeSnapshot ThemeSnapshot[]
+}
+
+// model DesignElementCatalog {
+//   id                 Int                  @id @default(autoincrement())
+//   name               String
+//   code               String               @unique // e.g., "top_nav", "banner_slider"
+//   defaultSettings    Json // JSON object
+//   canBeMultiple      Boolean              @default(true)
+//   isPlugin           Boolean              @default(false)
+//   createdAt          DateTime             @default(now())
+//   updatedAt          DateTime             @updatedAt
+//   ThemeDesignElement ThemeDesignElement[]
+// }
+model DesignElementCatalog {
+  id                 Int                  @id @default(autoincrement())
+  name               String
+  code               String               @unique
+  defaultSettings    Json
+  settingsSchema     Json? // <-- add this
+  canBeMultiple      Boolean              @default(true)
+  isPlugin           Boolean              @default(false)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  ThemeDesignElement ThemeDesignElement[]
+}
+
+model ThemeDesignElement {
+  id              Int      @id @default(autoincrement())
+  themeId         Int
+  designElementId Int? // link to catalog (optional)
+  name            String // display name (e.g., "Header")
+  customName      String?
+  code            String // must match catalog.code
+  position        Int // order
+  settings        Json // JSON object (draft)
+  isActive        Boolean  @default(true)
+  isPlugin        Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  theme         Theme                 @relation(fields: [themeId], references: [id], onDelete: Cascade)
+  designElement DesignElementCatalog? @relation(fields: [designElementId], references: [id])
+
+  @@index([themeId, position])
+  @@index([code])
+}
+
+model ThemeSnapshot {
+  id        Int      @id @default(autoincrement())
+  branchId  Int
+  themeId   Int
+  layout    Json // [{ type:"designElement", id, code, settings, data, position }, ...]
+  createdAt DateTime @default(now())
+
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  theme  Theme  @relation(fields: [themeId], references: [id], onDelete: Cascade)
+}
+
+model StoreSetting {
+  id       Int    @id @default(autoincrement())
+  branchId Int
+  key      String
+  value    String // keep as string to mirror your sample (you can JSON.parse where needed)
+
+  branch Branch @relation(fields: [branchId], references: [id], onDelete: Cascade)
+
+  @@unique([branchId, key])
+}
