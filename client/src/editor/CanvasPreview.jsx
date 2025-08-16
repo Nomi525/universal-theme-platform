@@ -17,11 +17,15 @@ export default function CanvasPreview() {
   return (
     <div className="flex-1 overflow-auto bg-slate-50">
       <div className="mx-auto max-w-6xl p-4 space-y-4">
-        {blocks.map((b) => (
-          <div key={b.id} className="bg-white rounded-lg shadow-sm">
-            <RenderBlock code={b.code} settings={b.settings} />
-          </div>
-        ))}
+        {blocks.map((b) => {
+          // add preview flag (but DO NOT force inline)
+          const settingsForPreview = { ...(b.settings || {}), __preview: true };
+          return (
+            <div key={b.id} className="bg-white rounded-lg shadow-sm">
+              <RenderBlock code={b.code} settings={settingsForPreview} />
+            </div>
+          );
+        })}
       </div>
     </div>
   );

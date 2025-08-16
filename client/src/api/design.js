@@ -37,10 +37,11 @@ export const deleteBlock = (id) =>
   api.delete(`/admin/design/blocks/${id}`).then((r) => r.data);
 
 export const publish = (branchId = 1) =>
-  api
-    .post(`/admin/design/publish`, { branch_id: branchId })
-    .then((r) => r.data);
+  api.post(`/admin/design/publish`, { branch_id: branchId }).then((r) => r.data);
 
 // Public
 export const getData = (branchId = 1) =>
   api.get(`/get-data`, { params: { branch_id: branchId } }).then((r) => r.data);
+
+// small helper used by the panel (optional)
+export const parseMaybe = (x) => (typeof x === "string" ? JSON.parse(x) : x);

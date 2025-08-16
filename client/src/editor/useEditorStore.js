@@ -11,13 +11,14 @@ import {
 
 export const useEditorStore = create((set, get) => ({
   branchId: 1,
-  theme: null, // { theme_details, design_elements }
-  available: [], // catalog
+  theme: null,            // { theme_details, design_elements }
+  available: [],          // catalog
   loading: false,
   error: null,
   selectedBlockId: null,
   catalogOpen: false,
 
+  /* ----------------------------- loading -------------------------------- */
   load: async () => {
     set({ loading: true, error: null });
     const branchId = get().branchId;
@@ -32,10 +33,19 @@ export const useEditorStore = create((set, get) => ({
     }
   },
 
+  refreshTheme: async () => {
+    const branchId = get().branchId;
+    const theme = await getTheme(branchId);
+    set({ theme });
+    return theme;
+  },
+
+  /* ---------------------------- ui helpers ------------------------------ */
   openCatalog: () => set({ catalogOpen: true }),
   closeCatalog: () => set({ catalogOpen: false }),
   selectBlock: (id) => set({ selectedBlockId: id }),
 
+  /* --------------------------- catalog add ------------------------------ */
   addFromCatalog: async (catalogItem) => {
     const { theme } = get();
     if (!theme) return;
@@ -55,27 +65,31 @@ export const useEditorStore = create((set, get) => ({
     set({ catalogOpen: false, selectedBlockId: res.id });
   },
 
-  updateSelectedSettings: async (newSettingsObj) => {
-    const { theme, selectedBlockId } = get();
-    const block = theme.design_elements.find((b) => b.id === selectedBlockId);
-    if (!block) return;
-    await updateBlock(block.id, { settings: newSettingsObj });
-    await get().load();
-  },
+  /* ---------------------------- after save ------------------------------ */
+  // patch local theme so preview updates right AFTER a successful save
+  applyLocalSettings: (blockId, settingsObj) =>
+    set((state) => {
+      if (!state.theme) return state;
+      const next = {
+        ...state.theme,
+        design_elements: state.theme.design_elements.map((b) =>
+          b.id === blockId ? { ...b, settings: JSON.stringify(settingsObj) } : b
+        ),
+      };
+      return { theme: next };
+    }),
 
+  /* --------------------------- reordering etc. -------------------------- */
   reorder: async (id, dir) => {
     const { theme } = get();
-    const list = [...theme.design_elements].sort(
-      (a, b) => a.position - b.position
-    );
+    const list = [...theme.design_elements].sort((a, b) => a.position - b.position);
     const idx = list.findIndex((b) => b.id === id);
     if (idx === -1) return;
 
     const swapWith = dir === "up" ? idx - 1 : idx + 1;
     if (swapWith < 0 || swapWith >= list.length) return;
 
-    const a = list[idx],
-      b = list[swapWith];
+    const a = list[idx], b = list[swapWith];
     await Promise.all([
       updateBlock(a.id, { position: b.position }),
       updateBlock(b.id, { position: a.position }),

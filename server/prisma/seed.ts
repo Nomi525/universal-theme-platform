@@ -29,6 +29,43 @@ const catalog = [
       custom_css: null,
       visibility: "all",
     },
+    settingsSchema: {
+      groups: [
+        {
+          label: "Content",
+          fields: [
+            { path: "section_title", type: "text", label: "Title" },
+            { path: "section_subtitle", type: "textarea", label: "Subtitle" },
+            { path: "display_title", type: "boolean", label: "Show Title" },
+            { path: "display_subtitle", type: "boolean", label: "Show Subtitle" },
+            { path: "images", type: "imageList", label: "Slides", itemLabel: "Image", withLink: true }
+          ]
+        },
+        {
+          label: "Behavior",
+          fields: [
+            { path: "animation_style", type: "select", label: "Animation", options: ["SLIDE", "FADE"] },
+            { path: "slideshow_delay", type: "number", label: "Delay (ms)", min: 1000, step: 500 },
+            { path: "show_dots", type: "boolean", label: "Show Dots" },
+            { path: "text_align", type: "select", label: "Text Align", options: ["left", "center", "right"] }
+          ]
+        },
+        {
+          label: "Style",
+          fields: [
+            { path: "section_background_color", type: "color", label: "Background" },
+            { path: "section_title_color", type: "color", label: "Title Color", showIf: { display_title: true } },
+            { path: "section_subtitle_color", type: "color", label: "Subtitle Color", showIf: { display_subtitle: true } },
+            { path: "images_shadow", type: "select", label: "Image Shadow", options: ["drop-shadow-none", "drop-shadow-sm", "drop-shadow", "drop-shadow-lg"] },
+            { path: "image_radius", type: "select", label: "Image Radius", options: ["none", "sm", "md", "lg", "xl", "2xl", "full"] },
+            { path: "section_top_margin", type: "spacing", label: "Top Margin" },
+            { path: "section_bottom_margin", type: "spacing", label: "Bottom Margin" },
+            { path: "section_top_inner_padding", type: "spacing", label: "Top Padding" },
+            { path: "section_bottom_inner_padding", type: "spacing", label: "Bottom Padding" }
+          ]
+        }
+      ]
+    },
   },
   {
     name: "Search Bar",
@@ -51,41 +88,41 @@ const catalog = [
       visibility: "all",
     },
     settingsSchema: {
-      fields: [
+      groups: [
         {
-          path: "outer_background_color",
-          type: "color",
-          label: "Outer Background",
-        },
-        { path: "background_color", type: "color", label: "Input Background" },
-        { path: "placeholder_text", type: "text", label: "Placeholder Text" },
-        {
-          path: "placeholder_text_color",
-          type: "color",
-          label: "Placeholder Color",
+          label: "Basics",
+          fields: [
+            { path: "placeholder_text", type: "text", label: "Placeholder" },
+            { path: "display_search_icon", type: "boolean", label: "Show Icon" },
+            { path: "sticky_search_bar", type: "boolean", label: "Sticky (mobile)" }
+          ]
         },
         {
-          path: "display_search_icon",
-          type: "boolean",
-          label: "Show Search Icon",
+          label: "Colors",
+          fields: [
+            { path: "outer_background_color", type: "color", label: "Outer Background" },
+            { path: "background_color", type: "color", label: "Input Background" },
+            { path: "placeholder_text_color", type: "color", label: "Placeholder Color" },
+            { path: "search_icon_color", type: "color", label: "Icon Color", showIf: { display_search_icon: true } }
+          ]
         },
-        { path: "search_icon_color", type: "color", label: "Icon Color" },
-        { path: "border", type: "boolean", label: "Border" },
         {
-          path: "border_size",
-          type: "select",
-          label: "Border Size",
-          options: ["0px", "1px", "2px"],
+          label: "Borders & Radius",
+          fields: [
+            { path: "border", type: "boolean", label: "Show Border" },
+            { path: "border_size", type: "select", label: "Border Size", options: ["0px", "1px", "2px"], showIf: { border: true } },
+            { path: "border_color", type: "color", label: "Border Color", showIf: { border: true } },
+            { path: "radius", type: "select", label: "Corner Radius", options: ["none", "sm", "md", "lg", "xl", "2xl", "full"] }
+          ]
         },
-        { path: "border_color", type: "color", label: "Border Color" },
         {
-          path: "radius",
-          type: "select",
-          label: "Corner Radius",
-          options: ["none", "sm", "md", "lg", "xl", "2xl", "full"],
-        },
-        { path: "sticky_search_bar", type: "boolean", label: "Sticky" },
-      ],
+          label: "Spacing",
+          fields: [
+            { path: "section_top_margin", type: "spacing", label: "Top Margin" },
+            { path: "section_bottom_margin", type: "spacing", label: "Bottom Margin" }
+          ]
+        }
+      ]
     },
   },
   {
@@ -121,25 +158,54 @@ const catalog = [
       visibility: "all",
     },
     settingsSchema: {
-      fields: [
-        { path: "display_title", type: "boolean", label: "Show Title" },
-        { path: "section_title", type: "text", label: "Title Text" },
-        { path: "section_title_color", type: "color", label: "Title Color" },
-        { path: "grid_column_count", type: "number", label: "Columns" },
+      groups: [
         {
-          path: "image_radius",
-          type: "select",
-          label: "Image Radius",
-          options: ["none", "sm", "md", "lg", "xl", "2xl", "full"],
+          label: "Header",
+          fields: [
+            { path: "display_title", type: "boolean", label: "Show Title" },
+            { path: "section_title", type: "text", label: "Title", showIf: { display_title: true } },
+            { path: "section_title_color", type: "color", label: "Title Color", showIf: { display_title: true } }
+          ]
         },
         {
-          path: "category_name_font_size",
-          type: "select",
-          label: "Name Size",
-          options: ["text-xs", "text-sm", "text-base", "text-lg"],
+          label: "Grid",
+          fields: [
+            { path: "grid_column_count", type: "number", label: "Columns", min: 2, max: 6 },
+            { path: "category_display_order", type: "select", label: "Order", options: ["DEFAULT", "ALPHABETICAL"] },
+            { path: "categories_to_show", type: "select", label: "Source", options: ["ALL", "CUSTOM"] },
+            { path: "custom_category_list", type: "idList", label: "Custom Categories", showIf: { categories_to_show: "CUSTOM" } }
+          ]
         },
-        { path: "category_name_color", type: "color", label: "Name Color" },
-      ],
+        {
+          label: "Images",
+          fields: [
+            { path: "image_radius", type: "select", label: "Image Radius", options: ["none", "sm", "md", "lg", "xl", "2xl", "full"] },
+            { path: "automatic_image_background_color", type: "boolean", label: "Auto Image BG" },
+            { path: "image_custom_background_color", type: "color", label: "Custom Image BG", showIf: { automatic_image_background_color: false } },
+            { path: "category_image_inner_padding", type: "spacing", label: "Image Padding" },
+            { path: "image_border", type: "boolean", label: "Image Border" },
+            { path: "image_border_size", type: "select", label: "Border Size", options: ["1px", "2px", "3px", "4px"], showIf: { image_border: true } },
+            { path: "image_border_color", type: "color", label: "Border Color", showIf: { image_border: true } }
+          ]
+        },
+        {
+          label: "Text",
+          fields: [
+            { path: "category_name_font_size", type: "select", label: "Font Size", options: ["text-xs", "text-sm", "text-base", "text-lg"] },
+            { path: "category_name_top_margin", type: "spacing", label: "Top Margin" },
+            { path: "category_name_color", type: "color", label: "Text Color" }
+          ]
+        },
+        {
+          label: "Section",
+          fields: [
+            { path: "section_background_color", type: "color", label: "Section Background" },
+            { path: "display_view_all_button", type: "boolean", label: "Show View All" },
+            { path: "section_top_margin", type: "spacing", label: "Top Margin" },
+            { path: "section_bottom_margin", type: "spacing", label: "Bottom Margin" }
+          ]
+        }
+      ]
     },
   },
   {
@@ -174,6 +240,21 @@ const catalog = [
       custom_css: null,
       visibility: "all",
     },
+    settingsSchema: {
+      fields: [
+        { path: "display_title", type: "boolean", label: "Show Title" },
+        { path: "section_title", type: "text", label: "Title", showIf: { display_title: true } },
+        { path: "section_title_color", type: "color", label: "Title Color", showIf: { display_title: true } },
+        { path: "image_size", type: "range", label: "Image Size", min: 1, max: 5, step: 1 },
+        { path: "image_radius", type: "select", label: "Image Radius", options: ["none", "sm", "md", "lg", "xl", "2xl", "full"] },
+        { path: "category_name_font_size", type: "select", label: "Name Size", options: ["text-xs", "text-sm", "text-base"] },
+        { path: "category_name_color", type: "color", label: "Name Color" },
+        { path: "section_background_color", type: "color", label: "Section Background" },
+        { path: "display_view_all_button", type: "boolean", label: "Show View All" },
+        { path: "section_top_margin", type: "spacing", label: "Top Margin" },
+        { path: "section_bottom_margin", type: "spacing", label: "Bottom Margin" }
+      ]
+    },
   },
   {
     name: "Showcase Products",
@@ -200,6 +281,48 @@ const catalog = [
       section_bottom_margin: "1.5rem",
       custom_css: null,
       visibility: "all",
+    },
+    settingsSchema: {
+      groups: [
+        {
+          label: "Header",
+          fields: [
+            { path: "display_title", type: "boolean", label: "Show Title" },
+            { path: "title", type: "text", label: "Title", showIf: { display_title: true } },
+            { path: "title_color", type: "color", label: "Title Color", showIf: { display_title: true } },
+            { path: "display_subtitle", type: "boolean", label: "Show Subtitle" },
+            { path: "subtitle", type: "text", label: "Subtitle", showIf: { display_subtitle: true } },
+            { path: "subtitle_color", type: "color", label: "Subtitle Color", showIf: { display_subtitle: true } }
+          ]
+        },
+        {
+          label: "Products",
+          fields: [
+            { path: "products_to_show", type: "select", label: "Source", options: ["ALL", "CATEGORIZED", "CUSTOM"] },
+            { path: "custom_product_list", type: "idList", label: "Custom Products", showIf: { products_to_show: "CUSTOM" } },
+            { path: "custom_category_list", type: "idList", label: "Categories", showIf: { products_to_show: "CATEGORIZED" } },
+            { path: "max_products", type: "number", label: "Max Products", min: 1, max: 50 },
+            { path: "product_display_order", type: "select", label: "Order", options: ["ALPHABETICAL", "NEWEST", "POPULAR"] }
+          ]
+        },
+        {
+          label: "Carousel",
+          fields: [
+            { path: "image_slideshow", type: "boolean", label: "Enable Carousel" },
+            { path: "animation_style", type: "select", label: "Animation", options: ["SLIDE", "FADE"], showIf: { image_slideshow: true } },
+            { path: "slideshow_delay", type: "number", label: "Delay (ms)", min: 1000, step: 500, showIf: { image_slideshow: true } }
+          ]
+        },
+        {
+          label: "Section",
+          fields: [
+            { path: "section_background_color", type: "color", label: "Background" },
+            { path: "display_view_all_button", type: "boolean", label: "Show View All" },
+            { path: "section_top_margin", type: "spacing", label: "Top Margin" },
+            { path: "section_bottom_margin", type: "spacing", label: "Bottom Margin" }
+          ]
+        }
+      ]
     },
   },
   {
@@ -228,6 +351,51 @@ const catalog = [
       custom_css: null,
       visibility: "all",
     },
+    settingsSchema: {
+      groups: [
+        {
+          label: "Header",
+          fields: [
+            { path: "display_title", type: "boolean", label: "Show Title" },
+            { path: "section_title", type: "text", label: "Title", showIf: { display_title: true } },
+            { path: "section_title_color", type: "color", label: "Title Color", showIf: { display_title: true } }
+          ]
+        },
+        {
+          label: "Products",
+          fields: [
+            { path: "products_to_show", type: "select", label: "Source", options: ["ALL", "CATEGORIZED", "CUSTOM"] },
+            { path: "custom_product_list", type: "idList", label: "Custom Products", showIf: { products_to_show: "CUSTOM" } },
+            { path: "custom_category_list", type: "idList", label: "Categories", showIf: { products_to_show: "CATEGORIZED" } },
+            { path: "max_products", type: "number", label: "Max Products", min: 1, max: 50 },
+            { path: "product_display_order", type: "select", label: "Order", options: ["ALPHABETICAL", "NEWEST", "POPULAR"] }
+          ]
+        },
+        {
+          label: "Hero",
+          fields: [
+            { path: "hero_image", type: "image", label: "Hero Image" }
+          ]
+        },
+        {
+          label: "Carousel",
+          fields: [
+            { path: "image_slideshow", type: "boolean", label: "Enable Carousel" },
+            { path: "animation_style", type: "select", label: "Animation", options: ["SLIDE", "FADE"], showIf: { image_slideshow: true } },
+            { path: "slideshow_delay", type: "number", label: "Delay (ms)", min: 1000, step: 500, showIf: { image_slideshow: true } }
+          ]
+        },
+        {
+          label: "Section",
+          fields: [
+            { path: "section_background_color", type: "color", label: "Background" },
+            { path: "display_view_all_button", type: "boolean", label: "Show View All" },
+            { path: "section_top_margin", type: "spacing", label: "Top Margin" },
+            { path: "section_bottom_margin", type: "spacing", label: "Bottom Margin" }
+          ]
+        }
+      ]
+    },
   },
   {
     name: "Products Infinite Scroll",
@@ -250,6 +418,19 @@ const catalog = [
       custom_css: null,
       visibility: "all",
       load_more_text: "Show More Products",
+    },
+    settingsSchema: {
+      fields: [
+        { path: "display_title", type: "boolean", label: "Show Title" },
+        { path: "title", type: "text", label: "Title", showIf: { display_title: true } },
+        { path: "title_color", type: "color", label: "Title Color", showIf: { display_title: true } },
+        { path: "display_subtitle", type: "boolean", label: "Show Subtitle" },
+        { path: "subtitle", type: "text", label: "Subtitle", showIf: { display_subtitle: true } },
+        { path: "subtitle_color", type: "color", label: "Subtitle Color", showIf: { display_subtitle: true } },
+        { path: "product_display_order", type: "select", label: "Order", options: ["ALPHABETICAL", "NEWEST", "POPULAR"] },
+        { path: "section_background_color", type: "color", label: "Background" },
+        { path: "load_more_text", type: "text", label: "Load More Text" }
+      ]
     },
   },
   {
@@ -277,6 +458,20 @@ const catalog = [
       section_bottom_inner_padding: "1.5rem",
       custom_css: null,
       visibility: "all",
+    },
+    settingsSchema: {
+      fields: [
+        { path: "images", type: "imageList", label: "Slides", itemLabel: "Image", withLink: true },
+        { path: "animation_style", type: "select", label: "Animation", options: ["SLIDE", "FADE"] },
+        { path: "slideshow_delay", type: "number", label: "Delay (ms)", min: 1000, step: 500 },
+        { path: "show_dots", type: "boolean", label: "Show Dots" },
+        { path: "section_title", type: "text", label: "Title" },
+        { path: "section_title_color", type: "color", label: "Title Color" },
+        { path: "section_subtitle", type: "text", label: "Subtitle" },
+        { path: "section_subtitle_color", type: "color", label: "Subtitle Color" },
+        { path: "text_align", type: "select", label: "Text Align", options: ["left", "center", "right"] },
+        { path: "image_radius", type: "select", label: "Image Radius", options: ["none", "sm", "md", "lg", "xl", "2xl", "full"] }
+      ]
     },
   },
   {
@@ -328,6 +523,49 @@ const catalog = [
       custom_css: null,
       visibility: "all",
     },
+    settingsSchema: {
+      groups: [
+        {
+          label: "Text",
+          fields: [
+            { path: "display_title", type: "boolean", label: "Show Title" },
+            { path: "title", type: "text", label: "Title", showIf: { display_title: true } },
+            { path: "title_color", type: "color", label: "Title Color", showIf: { display_title: true } },
+            { path: "title_size", type: "select", label: "Title Size", options: ["text-sm", "text-base", "text-lg", "text-xl", "text-2xl"] },
+            { path: "display_subtitle", type: "boolean", label: "Show Subtitle" },
+            { path: "subtitle", type: "text", label: "Subtitle", showIf: { display_subtitle: true } },
+            { path: "subtitle_color", type: "color", label: "Subtitle Color", showIf: { display_subtitle: true } },
+            { path: "subtitle_size", type: "select", label: "Subtitle Size", options: ["text-xs", "text-sm", "text-base"] }
+          ]
+        },
+        {
+          label: "Button",
+          fields: [
+            { path: "display_button", type: "boolean", label: "Show Button" },
+            { path: "button", type: "text", label: "Button Text", showIf: { display_button: true } },
+            { path: "button_background_color", type: "color", label: "Button BG", showIf: { display_button: true } },
+            { path: "button_color", type: "color", label: "Button Text Color", showIf: { display_button: true } },
+            { path: "button_radius", type: "select", label: "Button Radius", options: ["none", "sm", "md", "lg", "xl", "2xl", "full"], showIf: { display_button: true } },
+            { path: "button_width", type: "select", label: "Button Width", options: ["w-auto", "w-full"], showIf: { display_button: true } }
+          ]
+        },
+        {
+          label: "Image",
+          fields: [
+            { path: "display_image", type: "boolean", label: "Show Image" },
+            { path: "image", type: "image", label: "Image", showIf: { display_image: true } },
+            { path: "image_radius", type: "select", label: "Image Radius", options: ["none", "sm", "md", "lg", "xl", "2xl", "full"], showIf: { display_image: true } }
+          ]
+        },
+        {
+          label: "Section",
+          fields: [
+            { path: "section_background_color", type: "color", label: "Background" },
+            { path: "section_shadow", type: "select", label: "Shadow", options: ["drop-shadow-none", "drop-shadow-sm", "drop-shadow", "drop-shadow-lg"] }
+          ]
+        }
+      ]
+    },
   },
   {
     name: "Custom Design",
@@ -337,6 +575,13 @@ const catalog = [
       css: "",
       generate_css: true,
       visibility: "all",
+    },
+    settingsSchema: {
+      fields: [
+        { path: "html", type: "code", label: "HTML", language: "html" },
+        { path: "css", type: "code", label: "CSS", language: "css" },
+        { path: "generate_css", type: "boolean", label: "Generate Scoped CSS" }
+      ]
     },
   },
   {
@@ -364,6 +609,32 @@ const catalog = [
       desktop_search_bar_border_color: "#111827",
       desktop_search_bar_radius: "md",
       visibility: "all",
+    },
+    settingsSchema: {
+      groups: [
+        {
+          label: "Basics",
+          fields: [
+            { path: "logo_type", type: "select", label: "Logo Type", options: ["default", "white", "custom"] },
+            { path: "logo_placement", type: "select", label: "Logo Placement", options: ["left", "center"] },
+            { path: "left_button", type: "select", label: "Left Button", options: ["NONE", "MENU", "BACK"] },
+            { path: "right_button", type: "select", label: "Right Button", options: ["NONE", "SEARCH", "CART"] },
+            { path: "display_categories_on_menu", type: "boolean", label: "Show Categories" },
+            { path: "sticky_header", type: "boolean", label: "Sticky Header" }
+          ]
+        },
+        {
+          label: "Style",
+          fields: [
+            { path: "background_color", type: "color", label: "Background" },
+            { path: "text_color", type: "color", label: "Text Color" },
+            { path: "border", type: "boolean", label: "Border" },
+            { path: "desktop_search_bar_background_color", type: "color", label: "Search BG" },
+            { path: "desktop_search_bar_placeholder_text", type: "text", label: "Search Placeholder" },
+            { path: "desktop_search_bar_placeholder_text_color", type: "color", label: "Placeholder Color" }
+          ]
+        }
+      ]
     },
   },
   {
@@ -393,6 +664,39 @@ const catalog = [
         "Welcome to our store! We're here to bring you quality products and services with convenience, care, and trust.",
       desktop_footer_links_title: "Links",
       desktop_footer_links: [],
+    },
+    settingsSchema: {
+      groups: [
+        {
+          label: "Mobile Footer",
+          fields: [
+            { path: "footer_type", type: "select", label: "Type", options: ["blur_float", "blur_bottom", "solid"] },
+            { path: "footer_background_color", type: "color", label: "Background" },
+            { path: "footer_text_color", type: "color", label: "Text Color" },
+            { path: "footer_text_active_color", type: "color", label: "Active Color" },
+            { path: "show_discount_banner", type: "boolean", label: "Show Discount Banner" }
+          ]
+        },
+        {
+          label: "Icons",
+          fields: [
+            { path: "home_icon", type: "text", label: "Home Icon" },
+            { path: "search_icon", type: "text", label: "Search Icon" },
+            { path: "cart_icon", type: "text", label: "Cart Icon" },
+            { path: "account_icon", type: "text", label: "Account Icon" },
+          ],
+        },
+        {
+          label: "Desktop Footer",
+          fields: [
+            { path: "show_desktop_footer", type: "boolean", label: "Show on Desktop" },
+            { path: "show_desktop_footer_in_mobile_too", type: "boolean", label: "Also show on Mobile", showIf: { show_desktop_footer: true } },
+            { path: "desktop_footer_background_color", type: "color", label: "BG", showIf: { show_desktop_footer: true } },
+            { path: "desktop_footer_title_color", type: "color", label: "Title Color", showIf: { show_desktop_footer: true } },
+            { path: "desktop_footer_text_color", type: "color", label: "Text Color", showIf: { show_desktop_footer: true } }
+          ]
+        }
+      ]
     },
   },
 ];
@@ -435,8 +739,8 @@ async function main() {
       typeof c.settingsSchema === "undefined"
         ? undefined
         : c.settingsSchema === null
-        ? Prisma.DbNull
-        : (c.settingsSchema as Prisma.InputJsonValue);
+          ? Prisma.DbNull
+          : (c.settingsSchema as Prisma.InputJsonValue);
 
     await prisma.designElementCatalog.upsert({
       where: { code: c.code },
@@ -511,7 +815,7 @@ async function main() {
           position: 9,
           settings: {
             ...(typeof infinite.defaultSettings === "object" &&
-            infinite.defaultSettings !== null
+              infinite.defaultSettings !== null
               ? infinite.defaultSettings
               : {}),
             title: "Explore all",
@@ -576,7 +880,7 @@ async function main() {
           position: 4,
           settings: {
             ...(typeof categoriesGrid.defaultSettings === "object" &&
-            categoriesGrid.defaultSettings !== null
+              categoriesGrid.defaultSettings !== null
               ? categoriesGrid.defaultSettings
               : {}),
             display_title: false,
@@ -613,7 +917,7 @@ async function main() {
           position: 8,
           settings: {
             ...(typeof productStrip.defaultSettings === "object" &&
-            productStrip.defaultSettings !== null
+              productStrip.defaultSettings !== null
               ? productStrip.defaultSettings
               : {}),
             section_title: "Best deals, going out soon 🚀",
@@ -631,7 +935,7 @@ async function main() {
           position: 9,
           settings: {
             ...(typeof topNav.defaultSettings === "object" &&
-            topNav.defaultSettings !== null
+              topNav.defaultSettings !== null
               ? topNav.defaultSettings
               : {}),
             background_color: "rgb(255, 255, 255)",
@@ -650,7 +954,7 @@ async function main() {
           position: 10,
           settings: {
             ...(typeof bottomNav.defaultSettings === "object" &&
-            bottomNav.defaultSettings !== null
+              bottomNav.defaultSettings !== null
               ? bottomNav.defaultSettings
               : {}),
             footer_type: "blur_bottom",
