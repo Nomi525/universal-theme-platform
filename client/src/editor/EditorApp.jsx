@@ -20,6 +20,7 @@ export default function EditorApp() {
         <div className="font-semibold">Theme Editor</div>
         <ThemeSwitcher />
       </div>
+      <PublishBar />
 
       {loading ? (
         <div className="p-4">Loading…</div>
@@ -33,7 +34,6 @@ export default function EditorApp() {
         </div>
       )}
 
-      <PublishBar />
       <CatalogModal />
     </div>
   );

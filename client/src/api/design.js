@@ -1,3 +1,4 @@
+// api/design.js
 import { api } from "./http";
 
 export const getAvailable = (branchId = 1) =>
@@ -44,3 +45,19 @@ export const publish = (branchId = 1) =>
 // Public
 export const getData = (branchId = 1) =>
   api.get(`/get-data`, { params: { branch_id: branchId } }).then((r) => r.data);
+
+// small helper used by the panel (optional)
+export const parseMaybe = (x) => (typeof x === "string" ? JSON.parse(x) : x);
+
+export const listProducts = (params = {}) =>
+  // NOTE: api's baseURL is /api, so this hits /api/products
+  api
+    .get("/products", {
+      params: {
+        // sensible defaults; caller can override
+        order: "ALPHABETICAL",
+        take: 12,
+        ...params, // { cursor, order, take }
+      },
+    })
+    .then((r) => r.data);
