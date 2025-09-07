@@ -171,7 +171,9 @@ export default function BottomNav({ settings = {} }) {
           fire("nav:home");
           try {
             if (window?.location) window.location.href = "/";
-          } catch {}
+          } catch {
+            /* empty */
+          }
         },
         isActive: () =>
           window?.location?.pathname === "/" ||
@@ -230,12 +232,16 @@ export default function BottomNav({ settings = {} }) {
       })(setPad);
     try {
       ro.observe(el);
-    } catch {}
+    } catch {
+      /* empty */
+    }
     return () => {
       window.removeEventListener("resize", setPad);
       try {
         ro.disconnect();
-      } catch {}
+      } catch {
+        /* empty */
+      }
     };
   }, [isMobile, footer_type, cartCount]);
 
