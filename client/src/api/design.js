@@ -1,3 +1,4 @@
+// api/design.js
 import { api } from "./http";
 
 export const getAvailable = (branchId = 1) =>
@@ -37,7 +38,9 @@ export const deleteBlock = (id) =>
   api.delete(`/admin/design/blocks/${id}`).then((r) => r.data);
 
 export const publish = (branchId = 1) =>
-  api.post(`/admin/design/publish`, { branch_id: branchId }).then((r) => r.data);
+  api
+    .post(`/admin/design/publish`, { branch_id: branchId })
+    .then((r) => r.data);
 
 // Public
 export const getData = (branchId = 1) =>
@@ -45,3 +48,16 @@ export const getData = (branchId = 1) =>
 
 // small helper used by the panel (optional)
 export const parseMaybe = (x) => (typeof x === "string" ? JSON.parse(x) : x);
+
+export const listProducts = (params = {}) =>
+  // NOTE: api's baseURL is /api, so this hits /api/products
+  api
+    .get("/products", {
+      params: {
+        // sensible defaults; caller can override
+        order: "ALPHABETICAL",
+        take: 12,
+        ...params, // { cursor, order, take }
+      },
+    })
+    .then((r) => r.data);

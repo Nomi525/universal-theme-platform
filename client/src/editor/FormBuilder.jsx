@@ -1,20 +1,73 @@
 import React, { useMemo } from "react";
 
 /**
- * Schema shape supported:
+ * Supported schema:
  * { fields: FieldDef[] } OR { groups: { label?, fields: FieldDef[] }[] }
- * FieldDef: {
- *   path: "a.b.c",
- *   type: "text"|"textarea"|"number"|"range"|"boolean"|"color"|"select"|"image"|"imageList"|"idList",
- *   label?, required?, options?, min?, max?, step?, showIf?: { "some.path": value }
- * }
+ * FieldDef.type: "text" | "textarea" | "number" | "range" | "boolean" | "color"
+ *                | "select" | "image" | "imageList" | "idList" | "linkList"
+ *                | "spacing" | "code"
  */
+
+function LinkListField({ value = [], onChange }) {
+  const add = () => onChange([...(value || []), { label: "", href: "" }]);
+  const update = (idx, key, val) => {
+    const next = [...(value || [])];
+    next[idx] = { ...(next[idx] || {}), [key]: val };
+    onChange(next);
+  };
+  const remove = (idx) => {
+    const next = [...(value || [])];
+    next.splice(idx, 1);
+    onChange(next);
+  };
+
+  return (
+    <div className="space-y-2">
+      {(value || []).map((it, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <input
+            className="w-40 rounded-md border border-slate-200 px-2 py-1 text-sm"
+            placeholder="Label"
+            value={it?.label ?? ""}
+            onChange={(e) => update(i, "label", e.target.value)}
+          />
+          <input
+            className="flex-1 rounded-md border border-slate-200 px-2 py-1 text-sm"
+            placeholder="https://example.com"
+            value={it?.href ?? ""}
+            onChange={(e) => update(i, "href", e.target.value)}
+          />
+          <button
+            type="button"
+            className="text-rose-600 text-sm"
+            onClick={() => remove(i)}
+            aria-label="Remove"
+          >
+            ✕
+          </button>
+        </div>
+      ))}
+      <button
+        type="button"
+        className="mt-1 rounded border px-2 py-1 text-sm"
+        onClick={add}
+      >
+        Add a Link
+      </button>
+    </div>
+  );
+}
 
 const get = (obj, path) =>
   path.split(".").reduce((acc, k) => (acc == null ? acc : acc[k]), obj);
 
+const clone = (x) =>
+  typeof structuredClone === "function"
+    ? structuredClone(x)
+    : JSON.parse(JSON.stringify(x));
+
 const set = (obj, path, value) => {
-  const out = structuredClone(obj ?? {});
+  const out = clone(obj ?? {});
   const parts = path.split(".");
   let cur = out;
   for (let i = 0; i < parts.length - 1; i++) {
@@ -39,16 +92,23 @@ export function inferSchemaFromValue(value, prefix = "") {
     Object.entries(obj).forEach(([k, v]) => {
       const path = pathPrefix ? `${pathPrefix}.${k}` : k;
       if (v == null) fields.push({ path, type: "text", label: k });
-      else if (typeof v === "boolean") fields.push({ path, type: "boolean", label: k });
-      else if (typeof v === "number") fields.push({ path, type: "number", label: k });
+      else if (typeof v === "boolean")
+        fields.push({ path, type: "boolean", label: k });
+      else if (typeof v === "number")
+        fields.push({ path, type: "number", label: k });
       else if (typeof v === "string") {
         if (looksLikeColor(v)) fields.push({ path, type: "color", label: k });
-        else if (v.length > 60) fields.push({ path, type: "textarea", label: k });
+        else if (v.length > 60)
+          fields.push({ path, type: "textarea", label: k });
         else fields.push({ path, type: "text", label: k });
       } else if (Array.isArray(v)) {
         if (v.every((x) => typeof x === "string")) {
           const allUrls = v.every((x) => /^https?:\/\//.test(x) || x === "");
-          fields.push({ path, type: allUrls ? "imageList" : "idList", label: k });
+          fields.push({
+            path,
+            type: allUrls ? "imageList" : "idList",
+            label: k,
+          });
         } else if (v.every((x) => typeof x === "number")) {
           fields.push({ path, type: "idList", label: k });
         }
@@ -61,6 +121,18 @@ export function inferSchemaFromValue(value, prefix = "") {
   return { fields };
 }
 
+const SPACING_OPTIONS = [
+  "0rem",
+  "0.25rem",
+  "0.5rem",
+  "0.75rem",
+  "1rem",
+  "1.25rem",
+  "1.5rem",
+  "2rem",
+  "3rem",
+];
+
 function Field({ def, value, onChange }) {
   const label = def.label || def.path;
 
@@ -68,7 +140,9 @@ function Field({ def, value, onChange }) {
     case "text":
       return (
         <div className="space-y-1">
-          <label className="block text-xs font-medium text-slate-600">{label}</label>
+          <label className="block text-xs font-medium text-slate-600">
+            {label}
+          </label>
           <input
             className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
             value={value ?? ""}
@@ -80,7 +154,9 @@ function Field({ def, value, onChange }) {
     case "textarea":
       return (
         <div className="space-y-1">
-          <label className="block text-xs font-medium text-slate-600">{label}</label>
+          <label className="block text-xs font-medium text-slate-600">
+            {label}
+          </label>
           <textarea
             rows={4}
             className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
@@ -90,10 +166,28 @@ function Field({ def, value, onChange }) {
         </div>
       );
 
+    case "code":
+      return (
+        <div className="space-y-1">
+          <label className="block text-xs font-medium text-slate-600">
+            {label}
+          </label>
+          <textarea
+            rows={8}
+            spellCheck={false}
+            className="w-full font-mono rounded-md border border-slate-200 px-3 py-2 text-xs leading-5"
+            value={value ?? ""}
+            onChange={(e) => onChange(e.target.value)}
+          />
+        </div>
+      );
+
     case "number":
       return (
         <div className="space-y-1">
-          <label className="block text-xs font-medium text-slate-600">{label}</label>
+          <label className="block text-xs font-medium text-slate-600">
+            {label}
+          </label>
           <input
             type="number"
             min={def.min}
@@ -112,7 +206,9 @@ function Field({ def, value, onChange }) {
       return (
         <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <label className="block text-xs font-medium text-slate-600">{label}</label>
+            <label className="block text-xs font-medium text-slate-600">
+              {label}
+            </label>
             <span className="text-xs text-slate-500">{value ?? ""}</span>
           </div>
           <input
@@ -143,7 +239,9 @@ function Field({ def, value, onChange }) {
     case "color":
       return (
         <div className="space-y-1">
-          <label className="block text-xs font-medium text-slate-600">{label}</label>
+          <label className="block text-xs font-medium text-slate-600">
+            {label}
+          </label>
           <div className="flex items-center gap-2">
             <input
               type="color"
@@ -163,7 +261,9 @@ function Field({ def, value, onChange }) {
     case "select":
       return (
         <div className="space-y-1">
-          <label className="block text-xs font-medium text-slate-600">{label}</label>
+          <label className="block text-xs font-medium text-slate-600">
+            {label}
+          </label>
           <select
             className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
             value={value ?? ""}
@@ -181,10 +281,32 @@ function Field({ def, value, onChange }) {
         </div>
       );
 
+    case "spacing":
+      return (
+        <div className="space-y-1">
+          <label className="block text-xs font-medium text-slate-600">
+            {label}
+          </label>
+          <select
+            className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
+            value={value ?? "0rem"}
+            onChange={(e) => onChange(e.target.value)}
+          >
+            {SPACING_OPTIONS.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+        </div>
+      );
+
     case "image":
       return (
         <div className="space-y-1">
-          <label className="block text-xs font-medium text-slate-600">{label}</label>
+          <label className="block text-xs font-medium text-slate-600">
+            {label}
+          </label>
           <input
             className="w-full rounded-md border border-slate-200 px-3 py-2 text-sm"
             placeholder="https://…"
@@ -201,7 +323,9 @@ function Field({ def, value, onChange }) {
       return (
         <div className="space-y-1">
           <div className="flex items-center justify-between">
-            <label className="block text-xs font-medium text-slate-600">{label}</label>
+            <label className="block text-xs font-medium text-slate-600">
+              {label}
+            </label>
             <button
               type="button"
               className="rounded-md bg-slate-100 px-2 py-1 text-xs"
@@ -236,6 +360,19 @@ function Field({ def, value, onChange }) {
         </div>
       );
     }
+
+    case "linkList":
+      return (
+        <div className="space-y-1">
+          <label className="block text-xs font-medium text-slate-600">
+            {label}
+          </label>
+          <LinkListField
+            value={Array.isArray(value) ? value : []}
+            onChange={onChange}
+          />
+        </div>
+      );
 
     default:
       return (
@@ -273,14 +410,21 @@ export default function FormBuilder({ schema, value, onChange }) {
       {groups.map((g, gi) => (
         <div key={gi} className="space-y-3">
           {g.label && (
-            <h4 className="text-xs font-semibold uppercase text-slate-500">{g.label}</h4>
+            <h4 className="text-xs font-semibold uppercase text-slate-500">
+              {g.label}
+            </h4>
           )}
           {(g.fields || []).map((def) => {
             const visible = allFields.find((f) => f.path === def.path);
             if (!visible) return null;
             const current = get(value, def.path);
             return (
-              <Field key={def.path} def={def} value={current} onChange={(v) => handlePath(def.path, v)} />
+              <Field
+                key={def.path}
+                def={def}
+                value={current}
+                onChange={(v) => handlePath(def.path, v)}
+              />
             );
           })}
         </div>
