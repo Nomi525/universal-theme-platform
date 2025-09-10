@@ -40,3 +40,33 @@
 .read-the-docs {
   color: #888;
 }
+/* === Tight layout: collapse space between storefront blocks === */
+.block-reset {
+  margin: 0 !important;
+}
+
+/* Remove top/bottom margin on the block's top-level node */
+.block-reset > * {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+}
+
+/* If the block returns a <section> with py- classes, neutralize them */
+.block-reset > section {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* If a block returns a div with vertical padding at the root, neutralize it too */
+.block-reset > div[class*="py-"] {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+/* Avoid extra first/last-child spacing inside the block root */
+.block-reset > * > :first-child {
+  margin-top: 0 !important;
+}
+.block-reset > * > :last-child {
+  margin-bottom: 0 !important;
+}

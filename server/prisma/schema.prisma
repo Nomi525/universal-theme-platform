@@ -41,23 +41,12 @@ model Theme {
   ThemeSnapshot ThemeSnapshot[]
 }
 
-// model DesignElementCatalog {
-//   id                 Int                  @id @default(autoincrement())
-//   name               String
-//   code               String               @unique // e.g., "top_nav", "banner_slider"
-//   defaultSettings    Json // JSON object
-//   canBeMultiple      Boolean              @default(true)
-//   isPlugin           Boolean              @default(false)
-//   createdAt          DateTime             @default(now())
-//   updatedAt          DateTime             @updatedAt
-//   ThemeDesignElement ThemeDesignElement[]
-// }
 model DesignElementCatalog {
   id                 Int                  @id @default(autoincrement())
   name               String
-  code               String               @unique
+  code               String               @unique // e.g., "top_nav", "banner_slider"
   defaultSettings    Json
-  settingsSchema     Json? // <-- add this
+  settingsSchema     Json?
   canBeMultiple      Boolean              @default(true)
   isPlugin           Boolean              @default(false)
   createdAt          DateTime             @default(now())
@@ -109,16 +98,41 @@ model StoreSetting {
 }
 
 model Product {
-  id         Int      @id @default(autoincrement())
-  name       String
-  slug       String   @unique
-  price      Int // store in minor units (e.g. paise)
-  currency   String   @default("INR")
-  popularity Int      @default(0)
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
+  id              Int      @id @default(autoincrement())
+  name            String
+  slug            String   @unique
+  price           Int // paise
+  mrp             Int? // paise
+  discountPercent Int? // 0..100
+  currency        String   @default("INR")
+  popularity      Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
 
-  images ProductImage[]
+  images     ProductImage[]
+  // NEW
+  categories ProductCategory[]
+}
+
+// NEW: categories
+model Category {
+  id   Int    @id @default(autoincrement())
+  slug String @unique
+  name String
+  // optional: thumbnail, displayOrder, etc.
+
+  products ProductCategory[]
+}
+
+// NEW: m:n join table
+model ProductCategory {
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId Int
+
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId Int
+
+  @@id([productId, categoryId])
 }
 
 model ProductImage {

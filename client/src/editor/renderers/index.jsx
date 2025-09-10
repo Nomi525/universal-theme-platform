@@ -1,31 +1,62 @@
-import TopNav from "./TopNav";
+// client/src/editor/renderers/index.jsx (or .tsx)
+import AnnouncementBar from "./AnnouncementBar";
+import Banner from "./Banner";
+import BannerSlider from "./BannerSlider";
 import BottomNav from "./BottomNav";
-import ProductsInfiniteScroll from "./ProductsInfiniteScroll";
-import ProductHorizontalStrip from "./ProductHorizontalStrip";
 import CategoriesGrid from "./CategoriesGrid";
 import CustomHtmlBlock from "./CustomHtmlBlock";
-import Banner from "./Banner";
-import SliderCentered from "./SliderCentered";
+import FlashSaleHero from "./FlashSaleHero";
+import OffersCollections from "./OffersCollections";
+import ProductHorizontalStrip from "./ProductHorizontalStrip";
+import ProductsInfiniteScroll from "./ProductsInfiniteScroll";
 import SearchBlock from "./SearchBlock";
-import BannerSlider from "./BannerSlider";
+import SliderCentered from "./SliderCentered";
+import SocialProofStrip from "./SocialProofStrip";
+import StoreDeliveryInfo from "./StoreDeliveryInfo";
+import StoreHero from "./StoreHero";
+import StoreStats from "./StoreStats";
+import StoryHighlights from "./StoryHighlights";
+import TopNav from "./TopNav";
+import ProductsCategorized from "./ProductsCategorized";
+import CustomerTestimonials from "./CustomerTestimonials";
+import AboutUs from "./AboutUs";
+import MainCoupon from "./MainCoupon";
+import StoreInfo from "./StoreInfo";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const registry = {
   top_nav: TopNav,
   bottom_nav: BottomNav,
+  products_categorized: ProductsCategorized,
   products_infinite_scroll: ProductsInfiniteScroll,
-  product_horizontal_strip: ProductHorizontalStrip,
   categories_grid: CategoriesGrid,
   custom_html_block: CustomHtmlBlock,
   static_banner: Banner,
   slider_centered: SliderCentered,
   search_block: SearchBlock,
   banner_slider: BannerSlider,
+  announcement_bar: AnnouncementBar,
+  store_hero: StoreHero,
+  store_stats: StoreStats,
+  store_delivery_info: StoreDeliveryInfo,
+  flash_sale_hero: FlashSaleHero,
+  social_proof_strip: SocialProofStrip,
+  story_highlights: StoryHighlights,
+  offers_collections: OffersCollections,
+  customer_testimonials: CustomerTestimonials,
+  about_us: AboutUs,
+  main_coupon: MainCoupon,
+  store_info: StoreInfo,
 };
 
 export function RenderBlock({ code, settings }) {
   const Cmp = registry[code];
   if (!Cmp)
     return <div className="p-4 border bg-yellow-50">Unknown block: {code}</div>;
-  return <Cmp settings={settings} />;
+  // Wrap with reset container (removes outer top/bottom spacing of blocks)
+  return (
+    <div className="block-reset">
+      <Cmp settings={settings} />
+    </div>
+  );
 }

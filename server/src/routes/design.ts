@@ -15,7 +15,7 @@ router.get("/themes", async (req, res) => {
     orderBy: { id: "asc" },
   });
   res.json(
-    list.map((t) => ({
+    list.map((t: { id: any; name: any; isCurrent: any; }) => ({
       id: t.id,
       name: t.name,
       is_current: t.isCurrent ? 1 : 0,
@@ -32,7 +32,7 @@ router.get(
       orderBy: { id: "asc" },
     });
     res.json(
-      elements.map((e) => ({
+      elements.map((e: { id: any; name: any; code: any; defaultSettings: any; settingsSchema: any; canBeMultiple: any; }) => ({
         id: e.id,
         name: e.name,
         code: e.code,
@@ -52,7 +52,7 @@ router.get("/get-available-design-elements", async (_req, res) => {
     orderBy: { id: "asc" },
   });
   res.json(
-    elements.map((e) => ({
+    elements.map((e: { id: any; name: any; code: any; defaultSettings: any; settingsSchema: any; canBeMultiple: any; }) => ({
       id: e.id,
       name: e.name,
       code: e.code,
@@ -95,7 +95,7 @@ router.get("/get-theme", async (req, res) => {
       updated_at: theme.updatedAt,
     },
     design_elements: await Promise.all(
-      blocks.map(async (b) => {
+      blocks.map(async (b: { designElementId: any; code: any; id: any; name: any; customName: any; position: any; settings: any; isActive: any; isPlugin: any; }) => {
         const catalog = b.designElementId
           ? await prisma.designElementCatalog.findUnique({
               where: { id: b.designElementId },
@@ -272,7 +272,7 @@ router.post("/publish", async (req, res) => {
     orderBy: { position: "asc" },
   });
 
-  const layout = blocks.map((b) => ({
+  const layout = blocks.map((b: { id: any; code: any; settings: any; position: any; }) => ({
     type: "designElement",
     id: b.id,
     code: b.code,

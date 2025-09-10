@@ -1,6 +1,5 @@
 // client/src/editor/renderers/BottomNav.jsx
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import cn from "classnames";
 
 /* ---------- helpers ---------- */
 function useIsMobile(breakpoint = 768) {
@@ -50,9 +49,67 @@ function useCartCount() {
 const fire = (name, detail) =>
   window.dispatchEvent(new CustomEvent(name, { detail }));
 
-const Icon = ({ name, className }) => (
-  <i className={cn(name, className)} aria-hidden="true" />
-);
+/* ---------- Inline SVG icons (no external font needed) ---------- */
+function SvgIcon({ id, className }) {
+  const common = {
+    stroke: "currentColor",
+    fill: "none",
+    strokeWidth: 1.8,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+  };
+  if (id === "home")
+    return (
+      <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+        <path {...common} d="M3 10.5 12 3l9 7.5" />
+        <path {...common} d="M5 10v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-9" />
+        <path {...common} d="M9 21v-6h6v6" />
+      </svg>
+    );
+  if (id === "search")
+    return (
+      <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+        <circle {...common} cx="11" cy="11" r="7" />
+        <path {...common} d="M20 20l-3.5-3.5" />
+      </svg>
+    );
+  if (id === "cart")
+    return (
+      <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+        <path
+          {...common}
+          d="M3 4h2l2.2 10.4A2 2 0 0 0 9.2 16h6.9a2 2 0 0 0 2-1.6L20 8H6"
+        />
+        <circle cx="9.5" cy="20" r="1.6" fill="currentColor" />
+        <circle cx="16.5" cy="20" r="1.6" fill="currentColor" />
+      </svg>
+    );
+  // account
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path
+        {...{
+          stroke: "currentColor",
+          fill: "none",
+          strokeWidth: 1.8,
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        }}
+        d="M12 12a5 5 0 1 0-5-5 5 5 0 0 0 5 5Z"
+      />
+      <path
+        {...{
+          stroke: "currentColor",
+          fill: "none",
+          strokeWidth: 1.8,
+          strokeLinecap: "round",
+          strokeLinejoin: "round",
+        }}
+        d="M3.5 21a8.5 8.5 0 0 1 17 0"
+      />
+    </svg>
+  );
+}
 
 /* ---------- desktop “links” panel ---------- */
 function LinksFooter({ s }) {
@@ -125,17 +182,16 @@ function LinksFooter({ s }) {
 export default function BottomNav({ settings = {} }) {
   const s = settings || {};
 
-  // read settings first (not hooks)
+  // settings
   const {
     visibility = "all",
 
-    // mobile
-    footer_type = "blur_float",
+    // mobile bar
     footer_background_color = "#ffffff",
     footer_text_color = "#4b5563",
     footer_text_active_color = "#030712",
 
-    // desktop links panel
+    // desktop footer panel
     show_desktop_footer = true,
     show_desktop_footer_in_mobile_too = false,
     desktop_footer_background_color = "#f3f4f6",
@@ -147,16 +203,10 @@ export default function BottomNav({ settings = {} }) {
     desktop_footer_links_title = "Links",
     desktop_footer_links = [],
 
-    // icons
-    home_icon = "ri-home-5-line",
-    search_icon = "ri-search-line",
-    cart_icon = "ri-shopping-cart-line",
-    account_icon = "ri-user-line",
-
     custom_css = null,
   } = s;
 
-  // hooks — always in the same order
+  // hooks
   const isMobile = useIsMobile();
   const cartCount = useCartCount();
   const navRef = useRef(null);
@@ -165,15 +215,11 @@ export default function BottomNav({ settings = {} }) {
     () => [
       {
         key: "home",
-        label: "Home",
-        icon: home_icon,
         onClick: () => {
           fire("nav:home");
           try {
             if (window?.location) window.location.href = "/";
-          } catch {
-            /* empty */
-          }
+          } catch { /* empty */ }
         },
         isActive: () =>
           window?.location?.pathname === "/" ||
@@ -181,48 +227,53 @@ export default function BottomNav({ settings = {} }) {
       },
       {
         key: "search",
-        label: "Search",
-        icon: search_icon,
         onClick: () => fire("search:open"),
         isActive: () => false,
       },
-      {
-        key: "cart",
-        label: "Cart",
-        icon: cart_icon,
-        onClick: () => fire("cart:open"),
-        isActive: () => false,
-      },
+      { key: "cart", onClick: () => fire("cart:open"), isActive: () => false },
       {
         key: "account",
-        label: "Account",
-        icon: account_icon,
         onClick: () => fire("account:open"),
         isActive: () => false,
       },
     ],
-    [home_icon, search_icon, cart_icon, account_icon]
+    []
   );
 
+  /* reserve space beneath the fixed bar on the real scroll container */
   useLayoutEffect(() => {
-    // reserve space under fixed mobile bar
+    const restore = () => {
+      if (typeof document === "undefined") return;
+      const scrollEl =
+        document.querySelector("[data-scroll-container]") ||
+        document.scrollingElement ||
+        document.body;
+      document.documentElement.style.removeProperty("--bottom-nav-height");
+      scrollEl.style.paddingBottom = "";
+    };
+
     if (!isMobile) {
-      if (typeof document !== "undefined") {
-        document.body.style.paddingBottom = "";
-        document.documentElement.style.removeProperty("--bottom-nav-height");
-      }
+      restore();
       return;
     }
+
     const el = navRef.current;
     if (!el || typeof document === "undefined") return;
+
     const setPad = () => {
-      const h = el.offsetHeight || 0;
+      const h = el.getBoundingClientRect().height || 0;
       document.documentElement.style.setProperty(
         "--bottom-nav-height",
         `${h}px`
       );
-      document.body.style.paddingBottom = `calc(var(--bottom-nav-height) + 8px)`;
+      const scrollEl =
+        document.querySelector("[data-scroll-container]") ||
+        document.scrollingElement ||
+        document.body;
+      scrollEl.style.paddingBottom =
+        "calc(var(--bottom-nav-height) + env(safe-area-inset-bottom) + 8px)";
     };
+
     setPad();
     window.addEventListener("resize", setPad);
     const ro = new (window.ResizeObserver ||
@@ -232,67 +283,50 @@ export default function BottomNav({ settings = {} }) {
       })(setPad);
     try {
       ro.observe(el);
-    } catch {
-      /* empty */
-    }
+    } catch { /* empty */ }
+
     return () => {
       window.removeEventListener("resize", setPad);
       try {
         ro.disconnect();
-      } catch {
-        /* empty */
-      }
+      } catch { /* empty */ }
+      restore();
     };
-  }, [isMobile, footer_type, cartCount]);
+  }, [isMobile, cartCount]);
 
-  // visibility after hooks
+  // visibility
   const hiddenByVisibility =
     (visibility === "desktop" && isMobile) ||
     (visibility === "mobile" && !isMobile);
   if (hiddenByVisibility) return null;
 
-  // mobile bottom nav (only shown on mobile)
-  const isDock = footer_type === "blur_bottom" || footer_type === "solid";
+  /* ---------- MOBILE ICON-ONLY BAR (inline SVGs, full width) ---------- */
   const MobileBar = (
     <nav
       ref={navRef}
-      style={
-        isDock
-          ? {
-              position: "fixed",
-              zIndex: 1000,
-              left: 0,
-              right: 0,
-              bottom: "env(safe-area-inset-bottom)",
-            }
-          : {
-              position: "fixed",
-              zIndex: 1000,
-              left: "max(12px, env(safe-area-inset-left))",
-              right: "max(12px, env(safe-area-inset-right))",
-              bottom: "calc(env(safe-area-inset-bottom) + 12px)",
-            }
-      }
       aria-label="Bottom navigation"
+      style={{
+        position: "fixed",
+        zIndex: 1000,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: "100%",
+        maxWidth: "100%",
+        borderTop: "1px solid rgba(100,116,139,0.15)",
+        background: footer_background_color,
+        WebkitTapHighlightColor: "transparent",
+        boxSizing: "border-box",
+      }}
     >
       <div
-        className={cn(
-          "flex items-center justify-around shadow-lg",
-          isDock ? "rounded-none border-t" : "rounded-2xl"
-        )}
+        className="flex items-center justify-between"
         style={{
-          background: footer_background_color,
+          padding: "10px 14px",
+          paddingBottom: "calc(10px + env(safe-area-inset-bottom))",
           color: footer_text_color,
-          width: "100%",
-          maxWidth: isDock ? undefined : 560,
-          margin: "0 auto",
-          padding: isDock ? "10px 10px" : "10px 18px",
-          paddingBottom: isDock
-            ? "calc(10px + env(safe-area-inset-bottom))"
-            : "10px",
-          backdropFilter: footer_type.includes("blur")
-            ? "saturate(180%) blur(12px)"
-            : undefined,
+          margin: 0,
+          maxWidth: "100%",
         }}
       >
         {items.map((it) => {
@@ -302,16 +336,32 @@ export default function BottomNav({ settings = {} }) {
             <button
               key={it.key}
               onClick={it.onClick}
-              className="relative flex flex-col items-center gap-1 px-3 py-1"
-              style={{ color }}
-              aria-label={it.label}
+              aria-label={it.key}
+              className="relative flex items-center justify-center"
+              style={{
+                color,
+                height: 44, // tap target
+                width: 44,
+                borderRadius: 10,
+                outline: "none",
+              }}
             >
-              <Icon name={it.icon} className="text-xl leading-none" />
-              <span className={cn("text-xs", active ? "font-semibold" : "")}>
-                {it.label}
-              </span>
+              {/* INLINE SVG ICON (always visible) */}
+              <SvgIcon id={it.key} className="w-[22px] h-[22px]" />
+
+              {/* Cart badge */}
               {it.key === "cart" && cartCount > 0 && (
-                <span className="absolute -top-1.5 right-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-rose-600 px-1 text-[10px] font-semibold text-white">
+                <span
+                  className="absolute -top-1.5 -right-1.5 inline-flex items-center justify-center rounded-full bg-rose-600 text-white"
+                  style={{
+                    minWidth: 18,
+                    height: 18,
+                    padding: "0 4px",
+                    fontSize: 10,
+                    fontWeight: 700,
+                    lineHeight: 1,
+                  }}
+                >
                   {cartCount > 99 ? "99+" : cartCount}
                 </span>
               )}
@@ -342,7 +392,15 @@ export default function BottomNav({ settings = {} }) {
         />
       )}
 
-      {/* show the icon bar ONLY on mobile */}
+      {/* Spacer so last content never hides behind the fixed bar (mobile only) */}
+      {isMobile && (
+        <div
+          className="md:hidden"
+          style={{ height: "var(--bottom-nav-height)" }}
+        />
+      )}
+
+      {/* Mobile bar only on mobile */}
       {isMobile ? MobileBar : null}
 
       {custom_css ? <style>{custom_css}</style> : null}
