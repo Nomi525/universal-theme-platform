@@ -1,17 +1,22 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import cn from "classnames";
 
-/* ---------- tiny helpers ---------- */
-const vis = (v) =>
+/* helpers */
+const vis = (v: "all" | "desktop" | "mobile" = "all") =>
   v === "desktop" ? "hidden md:block" : v === "mobile" ? "block md:hidden" : "";
-
-const clampInt = (v, lo, hi, d) => {
+const clampInt = (v: any, lo: number, hi: number, d: number) => {
   const n = parseInt(v, 10);
   return Number.isFinite(n) ? Math.min(Math.max(n, lo), hi) : d;
 };
 
-/* ---------- icons ---------- */
-const PinIcon = ({ className, color = "#7c3aed" }) => (
+/* icon */
+const PinIcon = ({
+  className,
+  color = "#7c3aed",
+}: {
+  className?: string;
+  color?: string;
+}) => (
   <svg
     viewBox="0 0 24 24"
     width="18"
@@ -19,29 +24,58 @@ const PinIcon = ({ className, color = "#7c3aed" }) => (
     className={className}
     aria-hidden="true"
   >
-    <defs>
-      <linearGradient id="gradPin" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stopColor={color} />
-        <stop offset="100%" stopColor="#b794f4" />
-      </linearGradient>
-    </defs>
     <path
-      fill="url(#gradPin)"
+      fill={color}
       d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 10.5A3.5 3.5 0 1 1 12 5.5a3.5 3.5 0 0 1 0 7Z"
     />
   </svg>
 );
 
-/* ---------- modal ---------- */
-function Modal({ open, onClose, onApply, accent = "#7c3aed" }) {
+/* ---------- Simple Round Badge ---------- */
+function SimpleBadge({
+  src,
+  alt,
+  label,
+}: {
+  src: string;
+  alt: string;
+  label: string;
+}) {
+  return (
+    <div className="flex flex-col items-center gap-1">
+      <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-white ring-1 ring-slate-200 flex items-center justify-center overflow-hidden">
+        <img
+          src={src}
+          alt={alt}
+          className="h-8 w-8 object-contain"
+          loading="lazy"
+        />
+      </div>
+      <span className="text-[11px] text-slate-600">{label}</span>
+    </div>
+  );
+}
+
+/* modal */
+function Modal({
+  open,
+  onClose,
+  onApply,
+  accent = "#7c3aed",
+}: {
+  open: boolean;
+  onClose: () => void;
+  onApply: (pin: string) => void;
+  accent?: string;
+}) {
   const [pin, setPin] = useState("");
   const [touched, setTouched] = useState(false);
-  const inputRef = useRef(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const valid = /^\d{5,6}$/.test((pin || "").trim());
 
   useEffect(() => {
     if (!open) return;
-    const onKey = (e) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     const t = setTimeout(() => inputRef.current?.focus(), 10);
@@ -67,12 +101,12 @@ function Modal({ open, onClose, onApply, accent = "#7c3aed" }) {
       aria-labelledby="pincode_title"
     >
       <div
-        className="w-full max-w-sm rounded-2xl bg-white shadow-2xl p-5"
+        className="w-full max-w-sm rounded-md bg-white shadow-lg p-5"
         onMouseDown={(e) => e.stopPropagation()}
         role="document"
       >
         <div className="flex items-center gap-3 mb-3">
-          <div className="h-11 w-11 rounded-xl bg-slate-100 flex items-center justify-center">
+          <div className="h-11 w-11 rounded-md bg-slate-100 flex items-center justify-center">
             <PinIcon color={accent} />
           </div>
           <div>
@@ -87,15 +121,11 @@ function Modal({ open, onClose, onApply, accent = "#7c3aed" }) {
             </p>
           </div>
         </div>
-
-        <label className="sr-only" htmlFor="pincode_input">
-          Pincode
-        </label>
         <input
           id="pincode_input"
           ref={inputRef}
           className={cn(
-            "w-full rounded-2xl px-4 py-3 text-[15px] outline-none",
+            "w-full rounded-md px-4 py-3 text-[15px] outline-none",
             "border transition-colors",
             valid
               ? "border-emerald-500/70 focus:ring-2 focus:ring-emerald-500/40"
@@ -103,24 +133,21 @@ function Modal({ open, onClose, onApply, accent = "#7c3aed" }) {
           )}
           placeholder="Pincode"
           inputMode="numeric"
-          pattern="[0-9]*"
           maxLength={6}
           value={pin}
           onChange={(e) => setPin(e.target.value)}
           onBlur={() => setTouched(true)}
           onKeyDown={(e) => e.key === "Enter" && apply()}
         />
-
         {!valid && touched && (
           <p className="mt-2 text-xs text-slate-500">
             Enter a valid 5–6 digit code.
           </p>
         )}
-
         <button
           onClick={apply}
           disabled={!valid}
-          className="mt-4 w-full rounded-2xl px-4 py-3 text-[15px] font-semibold text-white transition-colors disabled:opacity-50"
+          className="mt-4 w-full rounded-md px-4 py-3 text-[15px] font-semibold text-white transition-colors disabled:opacity-50"
           style={{ backgroundColor: valid ? accent : "#9ca3af" }}
         >
           Apply
@@ -130,39 +157,44 @@ function Modal({ open, onClose, onApply, accent = "#7c3aed" }) {
   );
 }
 
-/* ---------- main ---------- */
-export default function StoreDeliveryInfo({ settings = {} }) {
+/* main */
+export default function StoreDeliveryInfo({ settings = {} as any }) {
   const s = settings || {};
   const accent = s.accent_color || "#7c3aed";
   const textColor = s.text_color || "#111827";
   const visibility = s.visibility || "all";
+
+  const TRUSTED_BADGE =
+    s.badge_trusted_url ||
+    "https://www.shutterstock.com/image-vector/trusted-seller-gold-medal-emblem-260nw-2492358241.jpg";
+  const EASY_RETURNS_BADGE =
+    s.badge_easy_returns_url ||
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcThhZlnFrvQv8xghKqPAxtwQZ605atofsQjSQ&s";
+
   const storeName =
     s.store_name ||
-    (typeof window !== "undefined" && window.__STORE_NAME) ||
+    (typeof window !== "undefined" && (window as any).__STORE_NAME) ||
     "Your Store";
 
   const [open, setOpen] = useState(false);
   const [pin, setPin] = useState("");
-  const [days, setDays] = useState(null);
+  const [days, setDays] = useState<number | null>(null);
 
   useEffect(() => {
     try {
       const saved = JSON.parse(localStorage.getItem("delivery_info") || "{}");
       if (saved.pin) setPin(saved.pin);
       if (saved.days) setDays(saved.days);
-    } catch {
-      /* ignore */
-    }
+    } catch {}
   }, []);
 
   const minDays = clampInt(s.min_days, 1, 10, 1);
   const maxDays = Math.max(minDays, clampInt(s.max_days, 1, 30, 5));
 
-  const handleApply = (p) => {
+  const handleApply = (p: string) => {
     const base = p.split("").reduce((a, c) => a + (c.charCodeAt(0) % 10), 0);
     const range = maxDays - minDays + 1;
     const d = minDays + (base % range);
-
     setPin(p);
     setDays(d);
     try {
@@ -170,9 +202,7 @@ export default function StoreDeliveryInfo({ settings = {} }) {
         "delivery_info",
         JSON.stringify({ pin: p, days: d })
       );
-    } catch {
-      /* ignore */
-    }
+    } catch {}
     setOpen(false);
   };
 
@@ -181,46 +211,52 @@ export default function StoreDeliveryInfo({ settings = {} }) {
     return `${storeName} delivers in ${days} ${days > 1 ? "days" : "day"}`;
   }, [pin, days, storeName]);
 
-  const rowClass = cn("w-full", "backdrop-blur-[1px]", vis(visibility));
+  const rowClass = cn("w-full", vis(visibility));
 
   return (
     <>
-      {/* OUTER wrapper: prevents any theme borders/overflow */}
       <div
         className={cn(
           rowClass,
-          "overflow-x-clip max-w-full border-0 rounded-none shadow-none"
+          "max-w-full bg-white border-t border-b border-slate-200"
         )}
-        style={{ backgroundColor: s.background_color || "#ffffff" }}
+        style={{ color: textColor }}
       >
-        {/* INNER card with a 2-column grid (icon | text). 
-            Button sits in the text column on the next row — EXACT left alignment under the first line. */}
-        <div
-          className="px-4 md:px-6 py-4 md:py-5 w-full max-w-full
-                     bg-white rounded-xl ring-1 ring-slate-200/80 shadow-sm"
-          style={{ color: textColor }}
-        >
-          <div className="grid grid-cols-[28px,1fr] gap-x-3 gap-y-2 items-start">
-            {/* Icon column spans both rows */}
-            <div className="row-span-2 h-7 w-7 rounded-lg bg-slate-100 flex items-center justify-center">
-              <PinIcon color={accent} />
+        <div className="px-4 md:px-6 py-4 md:py-5 w-full max-w-full">
+          <div className="flex items-center justify-between gap-4">
+            {/* LEFT */}
+            <div className="flex items-start gap-3 min-w-0 pr-3 max-w-[50%]">
+              <div className="h-7 w-7 rounded-md bg-slate-100 flex items-center justify-center shrink-0">
+                <PinIcon color={accent} />
+              </div>
+              <div className="min-w-0">
+                <div className="text-sm md:text-base font-medium text-slate-900 truncate">
+                  {leftText}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setOpen(true)}
+                  className="text-sm md:text-base font-semibold hover:underline focus:outline-none w-fit truncate"
+                  style={{ color: accent }}
+                >
+                  Get delivery information <span aria-hidden="true">›</span>
+                </button>
+              </div>
             </div>
 
-            {/* Row 1, col 2: main line */}
-            <div className="text-sm md:text-base font-medium text-slate-900">
-              {leftText}
+            {/* RIGHT */}
+            <div className="flex items-center gap-4 md:gap-5 shrink-0 pl-3 max-w-[50%]">
+              <SimpleBadge
+                src={EASY_RETURNS_BADGE}
+                alt="Easy Returns badge"
+                label="Easy Returns"
+              />
+              <SimpleBadge
+                src={TRUSTED_BADGE}
+                alt="Trusted Seller badge"
+                label="Trusted Seller"
+              />
             </div>
-
-            {/* Row 2, col 2: CTA aligned LEFT (inside the red area) */}
-            <button
-              type="button"
-              onClick={() => setOpen(true)}
-              className="justify-self-start text-sm md:text-base font-semibold hover:underline focus:outline-none"
-              style={{ color: accent }}
-              aria-label="Get delivery information"
-            >
-              Get delivery information <span aria-hidden="true">›</span>
-            </button>
           </div>
         </div>
       </div>
@@ -231,8 +267,6 @@ export default function StoreDeliveryInfo({ settings = {} }) {
         onApply={handleApply}
         accent={accent}
       />
-
-      {s.custom_css ? <style>{s.custom_css}</style> : null}
     </>
   );
 }

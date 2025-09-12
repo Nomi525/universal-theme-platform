@@ -1,27 +1,26 @@
 // client/src/editor/renderers/index.jsx (or .tsx)
+import AboutUs from "./AboutUs";
 import AnnouncementBar from "./AnnouncementBar";
 import Banner from "./Banner";
 import BannerSlider from "./BannerSlider";
 import BottomNav from "./BottomNav";
 import CategoriesGrid from "./CategoriesGrid";
+import CustomerTestimonials from "./CustomerTestimonials";
 import CustomHtmlBlock from "./CustomHtmlBlock";
 import FlashSaleHero from "./FlashSaleHero";
+import MainCoupon from "./MainCoupon";
 import OffersCollections from "./OffersCollections";
-import ProductHorizontalStrip from "./ProductHorizontalStrip";
+import ProductsCategorized from "./ProductsCategorized";
 import ProductsInfiniteScroll from "./ProductsInfiniteScroll";
 import SearchBlock from "./SearchBlock";
 import SliderCentered from "./SliderCentered";
 import SocialProofStrip from "./SocialProofStrip";
 import StoreDeliveryInfo from "./StoreDeliveryInfo";
 import StoreHero from "./StoreHero";
+import StoreInfo from "./StoreInfo";
 import StoreStats from "./StoreStats";
 import StoryHighlights from "./StoryHighlights";
 import TopNav from "./TopNav";
-import ProductsCategorized from "./ProductsCategorized";
-import CustomerTestimonials from "./CustomerTestimonials";
-import AboutUs from "./AboutUs";
-import MainCoupon from "./MainCoupon";
-import StoreInfo from "./StoreInfo";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export const registry = {

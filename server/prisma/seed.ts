@@ -1820,195 +1820,180 @@ const catalog = [
       ],
     },
   },
-  {
-    name: "Store Hero",
-    code: "store_hero",
-    defaultSettings: {
-      // canvas
-      height_desktop_px: 420, // ✅ numbers (px)
-      height_mobile_px: 280,
-      border_radius: "lg", // none | sm | md | lg | xl | 2xl
-      background_image_url:
-        "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1600&auto=format&fit=crop",
-      background_object_position: "center",
+{
+  name: "Store Hero",
+  code: "store_hero",
+  defaultSettings: {
+    height_desktop_px: 420,
+    height_mobile_px: 280,
+    border_radius: "lg",
+    background_image_url:
+      "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=1600&auto=format&fit=crop",
+    background_object_position: "center",
 
-      // overlay as color + opacity (no rgba validation issues)
-      overlay_color: "#000000",
-      overlay_opacity: 25, // 0–100 (%)
+    overlay_color: "#000000",
+    overlay_opacity: 25,
 
-      // store logo badge (bottom-left)
-      show_logo_badge: true,
-      logo_image_url: "",
-      logo_badge_size: 88, // ✅ bigger by default
-      logo_badge_shape: "rounded", // rounded | circle | square
-      logo_badge_shadow: true,
-      logo_badge_inner_padding: 6, // px (keeps logo inset, like your reference)
+    show_logo_badge: true,
+    logo_image_url: "",
+    logo_badge_size: 88,
+    logo_badge_shape: "rounded",
+    logo_badge_shadow: true,
+    logo_badge_inner_padding: 6,
 
-      // “Made with Zepio” chip (bottom-right)
-      show_made_with: true,
-      made_with_text: "Made with StoreMins", // ✅ exact text
-      made_with_link: "https://storemins.com",
-      show_made_with_icon: true,
-      made_with_icon_url:
-        "https://minis-media-assets.swiggy.com/swiggymini/image/upload/h_128,c_fit,fl_lossy,q_auto:eco,f_auto/IMAGE/847486d0-db3e-4d54-bee7-b537747c7ecd/0gZi8UlkP9cWIQrrlQF1u-B63F0C50-8D0C-4529-AC08-1613096E9E43.png",
+    show_made_with: true,
+    made_with_text: "Made with StoreMins",
+    made_with_link: "https://storemins.com",
+    show_made_with_icon: true,
+    made_with_icon_url:
+      "https://minis-media-assets.swiggy.com/swiggymini/image/upload/h_128,c_fit,fl_lossy,q_auto:eco,f_auto/IMAGE/847486d0-db3e-4d54-bee7-b537747c7ecd/0gZi8UlkP9cWIQrrlQF1u-B63F0C50-8D0C-4529-AC08-1613096E9E43.png",
 
-      // spacing
-      inset_padding: 14,
-
-      // misc
-      custom_css: null,
-      visibility: "all",
-    },
-    settingsSchema: {
-      groups: [
-        {
-          label: "Background",
-          fields: [
-            { path: "background_image_url", type: "image", label: "Image" },
-            {
-              path: "background_object_position",
-              type: "text",
-              label: "Object position (CSS)",
-              placeholder: "center, 50% 40%, left top…",
-            },
-            // use number fields to avoid “0rem” getting stored
-            {
-              path: "height_desktop_px",
-              type: "number",
-              label: "Height (desktop, px)",
-              min: 120,
-              max: 1000,
-              step: 10,
-            },
-            {
-              path: "height_mobile_px",
-              type: "number",
-              label: "Height (mobile, px)",
-              min: 120,
-              max: 800,
-              step: 10,
-            },
-            {
-              path: "border_radius",
-              type: "select",
-              label: "Corner radius",
-              options: ["none", "sm", "md", "lg", "xl", "2xl"],
-            },
-            // color + opacity avoid rgba validation
-            { path: "overlay_color", type: "color", label: "Overlay color" },
-            {
-              path: "overlay_opacity",
-              type: "number",
-              label: "Overlay opacity (%)",
-              min: 0,
-              max: 100,
-              step: 1,
-            },
-          ],
-        },
-        {
-          label: "Logo badge (bottom-left)",
-          fields: [
-            {
-              path: "show_logo_badge",
-              type: "boolean",
-              label: "Show logo badge",
-            },
-            {
-              path: "logo_image_url",
-              type: "image",
-              label: "Logo image",
-              showIf: { show_logo_badge: true },
-            },
-            {
-              path: "logo_badge_size",
-              type: "number",
-              label: "Size (px)",
-              min: 36,
-              max: 160,
-              step: 2,
-              showIf: { show_logo_badge: true },
-            },
-            {
-              path: "logo_badge_shape",
-              type: "select",
-              label: "Shape",
-              options: ["rounded", "circle", "square"],
-              showIf: { show_logo_badge: true },
-            },
-            {
-              path: "logo_badge_inner_padding",
-              type: "number",
-              label: "Inner padding (px)",
-              min: 0,
-              max: 20,
-              step: 1,
-              showIf: { show_logo_badge: true },
-            },
-            {
-              path: "logo_badge_shadow",
-              type: "boolean",
-              label: "Shadow",
-              showIf: { show_logo_badge: true },
-            },
-          ],
-        },
-        {
-          label: "Made with chip (bottom-right)",
-          fields: [
-            { path: "show_made_with", type: "boolean", label: "Show chip" },
-            {
-              path: "made_with_text",
-              type: "text",
-              label: "Text",
-              showIf: { show_made_with: true },
-            },
-            {
-              path: "made_with_link",
-              type: "text",
-              label: "Link",
-              showIf: { show_made_with: true },
-            },
-            {
-              path: "show_made_with_icon",
-              type: "boolean",
-              label: "Show icon",
-              showIf: { show_made_with: true },
-            },
-            {
-              path: "made_with_icon_url",
-              type: "image",
-              label: "Icon",
-              showIf: { show_made_with: true },
-            },
-          ],
-        },
-        {
-          label: "Advanced",
-          fields: [
-            {
-              path: "inset_padding",
-              type: "number",
-              label: "Edge padding (px)",
-              min: 0,
-              max: 40,
-              step: 1,
-            },
-            { path: "custom_css", type: "textarea", label: "Custom CSS" },
-            {
-              path: "visibility",
-              type: "select",
-              label: "Visibility",
-              options: ["all", "desktop", "mobile"],
-            },
-          ],
-        },
-      ],
-    },
+    inset_padding: 14,
+    custom_css: null,
+    visibility: "all",
   },
-
-  // …inside const catalog = [ ... ] add this block (or replace your old store_stats)
-  {
+  settingsSchema: {
+    groups: [
+      {
+        label: "Background",
+        fields: [
+          { path: "background_image_url", type: "image", label: "Image" },
+          {
+            path: "background_object_position",
+            type: "text",
+            label: "Object position (CSS)",
+            placeholder: "center, 50% 40%, left top…",
+          },
+          {
+            path: "height_desktop_px",
+            type: "number",
+            label: "Height (desktop, px)",
+            min: 120,
+            max: 1000,
+            step: 10,
+          },
+          {
+            path: "height_mobile_px",
+            type: "number",
+            label: "Height (mobile, px)",
+            min: 120,
+            max: 800,
+            step: 10,
+          },
+          {
+            path: "border_radius",
+            type: "select",
+            label: "Corner radius",
+            options: ["none", "sm", "md", "lg", "xl", "2xl"],
+          },
+          { path: "overlay_color", type: "color", label: "Overlay color" },
+          {
+            path: "overlay_opacity",
+            type: "number",
+            label: "Overlay opacity (%)",
+            min: 0,
+            max: 100,
+            step: 1,
+          },
+        ],
+      },
+      {
+        label: "Logo badge (bottom-left)",
+        fields: [
+          { path: "show_logo_badge", type: "boolean", label: "Show logo badge" },
+          {
+            path: "logo_image_url",
+            type: "image",
+            label: "Logo image",
+            showIf: { show_logo_badge: true },
+          },
+          {
+            path: "logo_badge_size",
+            type: "number",
+            label: "Size (px)",
+            min: 36,
+            max: 160,
+            step: 2,
+            showIf: { show_logo_badge: true },
+          },
+          {
+            path: "logo_badge_shape",
+            type: "select",
+            label: "Shape",
+            options: ["rounded", "circle", "square"],
+            showIf: { show_logo_badge: true },
+          },
+          {
+            path: "logo_badge_inner_padding",
+            type: "number",
+            label: "Inner padding (px)",
+            min: 0,
+            max: 20,
+            step: 1,
+            showIf: { show_logo_badge: true },
+          },
+          {
+            path: "logo_badge_shadow",
+            type: "boolean",
+            label: "Shadow",
+            showIf: { show_logo_badge: true },
+          },
+        ],
+      },
+      {
+        label: "Made with chip (bottom-right)",
+        fields: [
+          { path: "show_made_with", type: "boolean", label: "Show chip" },
+          {
+            path: "made_with_text",
+            type: "text",
+            label: "Text",
+            showIf: { show_made_with: true },
+          },
+          {
+            path: "made_with_link",
+            type: "text",
+            label: "Link",
+            showIf: { show_made_with: true },
+          },
+          {
+            path: "show_made_with_icon",
+            type: "boolean",
+            label: "Show icon",
+            showIf: { show_made_with: true },
+          },
+          {
+            path: "made_with_icon_url",
+            type: "image",
+            label: "Icon",
+            showIf: { show_made_with: true },
+          },
+        ],
+      },
+      {
+        label: "Advanced",
+        fields: [
+          {
+            path: "inset_padding",
+            type: "number",
+            label: "Edge padding (px)",
+            min: 0,
+            max: 40,
+            step: 1,
+          },
+          { path: "custom_css", type: "textarea", label: "Custom CSS" },
+          {
+            path: "visibility",
+            type: "select",
+            label: "Visibility",
+            options: ["all", "desktop", "mobile"],
+          },
+        ],
+      },
+    ],
+  },
+},
+{
     name: "Store Stats",
     code: "store_stats",
     defaultSettings: {

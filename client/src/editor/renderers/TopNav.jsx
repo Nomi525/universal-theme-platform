@@ -1,6 +1,6 @@
 // client/src/editor/renderers/TopNav.jsx
 import cn from "classnames";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useLayoutEffect } from "react";
 
 /* ----------------- helpers ----------------- */
 
@@ -74,10 +74,6 @@ function useIsMdUp() {
 
 /* ----------------- icons ----------------- */
 
-/**
- * All icons accept { size=22, className, ...rest }.
- * We avoid hard-coded width/height so we can shrink on small devices.
- */
 const Svg = ({ size = 22, className, children, ...rest }) => (
   <svg
     viewBox="0 0 24 24"
@@ -219,20 +215,17 @@ const Icon = {
 function getBrandFromSettings(s) {
   const win = typeof window !== "undefined" ? window : {};
   const name = s.brand_name || win.__STORE_NAME || "SampleStore.co";
-
   const subtitle =
     s.brand_subtitle ||
     s.business_category ||
     s.store_category ||
     win.__STORE_TAGLINE ||
-    "Beauty"; // sensible default for demo
-
+    "Beauty";
   return { name, subtitle };
 }
 
 const Logo = ({ type, textColor, name, subtitle }) => {
   if (type === "none") return null;
-
   return (
     <div className="inline-flex flex-col leading-tight min-w-0">
       <span className="font-semibold truncate" style={{ color: textColor }}>
@@ -246,40 +239,37 @@ const Logo = ({ type, textColor, name, subtitle }) => {
 };
 
 const PillSearchButton = ({ s, onOpen }) => {
-  const style = {
-    backgroundColor: s.desktop_search_bar_background_color || "#ffffff",
-    color: s.desktop_search_bar_placeholder_text_color || "#6b7280",
-    ...(s.desktop_search_bar_border
-      ? {
-          borderStyle: "solid",
-          borderWidth: s.desktop_search_bar_border_size || "1px",
-          borderColor: s.desktop_search_bar_border_color || "#e5e7eb",
-        }
-      : { borderWidth: 0 }),
-  };
+  const bg = s.desktop_search_bar_background_color || "#ffffff";
+  const ph = s.desktop_search_bar_placeholder_text_color || "#9ca3af";
 
   return (
     <button
       type="button"
-      className={cn(
-        "hidden md:flex w-[34rem] max-w-[42vw] items-center px-4 py-2 cursor-text",
-        "focus:outline-none focus:ring-2 focus:ring-slate-300/70",
-        radiusClass[s.desktop_search_bar_radius || "full"]
-      )}
-      style={style}
+      aria-label="Open search"
       onClick={onOpen}
       onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onOpen()}
-      aria-label="Open search"
+      className={cn(
+        "hidden md:flex w-[34rem] max-w-[42vw] items-center px-4 py-2 cursor-text",
+        // ✨ effect: soft border + shadow
+        "border border-slate-200/60 bg-white shadow-sm",
+        "hover:border-slate-300 hover:shadow-md",
+        "focus:outline-none focus:ring-2 focus:ring-slate-200/80",
+        radiusClass[s.desktop_search_bar_radius || "full"],
+        "transition-all duration-200 ease-in-out"
+      )}
+      style={{
+        backgroundColor: bg,
+        color: ph,
+      }}
     >
-      {s.desktop_search_bar_display_search_icon && (
-        <span
-          className="mr-2 opacity-80"
-          style={{ color: s.desktop_search_bar_search_icon_color || "#6b7280" }}
-        >
-          <Icon.search />
+      {/* icon inside pill - same look as input */}
+      {s.desktop_search_bar_display_search_icon !== false && (
+        <span className="mr-2 text-slate-400 flex items-center">
+          <Icon.search size={18} />
         </span>
       )}
-      <span className="w-full text-left text-sm opacity-80 truncate">
+      {/* input-like text */}
+      <span className="w-full text-left text-sm text-slate-500 truncate">
         {s.desktop_search_bar_placeholder_text || "Search products"}
       </span>
     </button>
@@ -306,7 +296,6 @@ const IconTap = ({ label, onClick, children, color }) => (
 const SearchDialog = ({ open, onClose, placeholder }) => {
   useLockBodyScroll(open);
   const inputRef = useRef(null);
-
   useEffect(() => {
     if (!open) return;
     const onKey = (e) => e.key === "Escape" && onClose();
@@ -314,9 +303,7 @@ const SearchDialog = ({ open, onClose, placeholder }) => {
     setTimeout(() => inputRef.current?.focus(), 0);
     return () => document.removeEventListener("keydown", onKey);
   }, [open, onClose]);
-
   if (!open) return null;
-
   return (
     <div
       className="fixed inset-0 z-[1000] bg-black/60 flex items-start justify-center p-3 sm:p-4 md:p-8"
@@ -336,7 +323,6 @@ const SearchDialog = ({ open, onClose, placeholder }) => {
         >
           <Icon.close size={18} />
         </button>
-
         <div className="p-3 sm:p-4 md:p-6">
           <div className="flex items-center gap-2 rounded-lg border border-slate-200 px-2.5 md:px-3 py-2">
             <button
@@ -399,28 +385,54 @@ const Drawer = ({ title = "Menu", open, onClose, children }) => {
 export default function TopNav({ settings = {} }) {
   const isEditor = useIsEditorPage();
   const s = settings || {};
-
   const mdUp = useIsMdUp();
 
-  // Allow optional override from settings
   const sizes = useMemo(() => {
-    const sm = Number(s.icon_size_sm) || 18; // small screens
-    const md = Number(s.icon_size_md) || 22; // md and up
-    const lg = Number(s.icon_size_lg) || 24; // for few bigger glyphs
+    const sm = Number(s.icon_size_sm) || 18;
+    const md = Number(s.icon_size_md) || 22;
+    const lg = Number(s.icon_size_lg) || 24;
     return { sm, md, lg };
   }, [s.icon_size_sm, s.icon_size_md, s.icon_size_lg]);
 
   const iconSize = mdUp ? sizes.md : sizes.sm;
-  const bigIconSize = mdUp ? sizes.lg : sizes.md; // for bagHeart, cart etc
+  const bigIconSize = mdUp ? sizes.lg : sizes.md;
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
+  // Visibility helpers to avoid blank spacer when header is hidden
+  const showOnMobile = s.visibility !== "desktop";
+  const showOnDesktop = s.visibility !== "mobile";
+
+  // Desktop behavior: sticky/fixed via setting
+  const desktopStickyOn = !!s.sticky_header;
+  const desktopFixedOn = desktopStickyOn && isEditor;
+
+  // measure header height to add spacer when fixed so layout doesn't jump
+  const headerRef = useRef(null);
+  const [headerH, setHeaderH] = useState(0);
+  useLayoutEffect(() => {
+    if (!headerRef.current) return;
+    const el = headerRef.current;
+    const measure = () => setHeaderH(el.getBoundingClientRect().height || 0);
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(el);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
   const classes = cn(
     "w-full",
     visibilityClass(s.visibility),
-    s.sticky_header ? "sticky top-0 z-40" : "",
-    s.border ? "border-b border-slate-200" : ""
+    "fixed top-0 left-0 right-0 z-[100] md:static md:top-auto md:left-auto md:right-auto md:z-auto",
+    desktopStickyOn && !desktopFixedOn && "md:sticky md:top-0 md:z-[100]",
+    desktopFixedOn && "md:fixed md:top-0 md:left-0 md:right-0 md:z-[100]",
+    // remove the hairline
+    s.border ? "border-b-0" : ""
   );
 
   const rowClass = isEditor
@@ -449,8 +461,13 @@ export default function TopNav({ settings = {} }) {
   return (
     <>
       <header
+        ref={headerRef}
         className={classes}
-        style={{ backgroundColor: s.background_color || "#fff" }}
+        style={{
+          backgroundColor: s.background_color || "#fff",
+          // ensure it sits above content when fixed/sticky over parents
+          willChange: "transform",
+        }}
       >
         <div className={rowClass}>
           {/* Left button (legacy) */}
@@ -477,7 +494,8 @@ export default function TopNav({ settings = {} }) {
             )}
           </div>
 
-          {/* Logo + business category (subtitle) */}
+          {/* BRAND BLOCK REMOVED (commented out) */}
+          {/*
           <div
             className={cn(
               "flex-1 flex items-center min-w-0",
@@ -491,13 +509,19 @@ export default function TopNav({ settings = {} }) {
               subtitle={brand.subtitle}
             />
           </div>
+          */}
+
+          {/* Spacer to keep layout balanced when brand hidden */}
+          <div className={cn("flex-1 min-w-0")} />
 
           {/* Desktop search pill */}
           {showSearch && <PillSearchButton s={s} onOpen={openSearch} />}
 
           {/* Right: icon row */}
           <div className="flex items-center gap-1.5 md:gap-3">
-            {showSearch && (
+            {/* only show standalone search icon on mobile,
+      not when desktop pill search is visible */}
+            {showSearch && !mdUp && (
               <IconTap color={textColor} label="Search" onClick={openSearch}>
                 <Icon.search size={iconSize} />
               </IconTap>
@@ -557,6 +581,25 @@ export default function TopNav({ settings = {} }) {
           </div>
         </div>
       </header>
+
+      {/* Spacers:
+          - Mobile: always, since header is fixed on mobile.
+          - Desktop: only if editor+sticky enabled (desktopFixedOn).
+      */}
+      {showOnMobile && (
+        <div
+          className="block md:hidden"
+          style={{ height: headerH }}
+          aria-hidden="true"
+        />
+      )}
+      {showOnDesktop && desktopFixedOn && (
+        <div
+          className="hidden md:block"
+          style={{ height: headerH }}
+          aria-hidden="true"
+        />
+      )}
 
       {/* Menu drawer */}
       <Drawer title="Menu" open={menuOpen} onClose={() => setMenuOpen(false)}>

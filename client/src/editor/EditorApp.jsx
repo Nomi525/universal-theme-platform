@@ -29,7 +29,7 @@ export default function EditorApp() {
       ) : (
         <div className="flex flex-1">
           <BlocksList />
-          <CanvasPreview />
+          <CanvasPreview /> 
           <PropertiesPanel />
         </div>
       )}
