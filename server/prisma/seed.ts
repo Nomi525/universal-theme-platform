@@ -3978,7 +3978,7 @@ async function main() {
   // Settings (short list – extend as you like)
   const settings = [
     ["storeName", "My Online Store"],
-    ["storeUrl", "https://techcronet.zepio.io"],
+    ["storeUrl", "https://techcronet.storemins.com"],
     ["currencyCode", "INR"],
     ["currencySymbol", "₹"],
     ["locale", "en-IN"],
@@ -4034,14 +4034,14 @@ async function main() {
       branchId: branch.id,
       name: "Default",
       shortDesc: "Default theme",
-      author: "Zepio",
+      author: "StoreMins",
       version: "1.0.0",
       image: "/assets/admin/images/placeholders/theme_placeholder.webp",
       isCurrent: true,
     },
   });
 
-  // helper (put near the top of the file)
+  // helper
   const jsonAsObject = (v: Prisma.JsonValue) =>
     typeof v === "object" && v !== null && !Array.isArray(v)
       ? (v as Prisma.JsonObject)

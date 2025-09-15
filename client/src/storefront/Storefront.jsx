@@ -1,9 +1,9 @@
 // client/src/storefront/Storefront.jsx
-import React, { useEffect, useMemo, useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
+import { Route, Routes } from "react-router-dom";
 import { getData } from "../api/design";
-import ProductDetails from "../editor/renderers/ProductDetails";
 import { RenderBlock } from "../editor/renderers";
+import ProductDetails from "../editor/renderers/ProductDetails";
 
 /* Detect editor vs storefront */
 function useIsEditorPage() {
