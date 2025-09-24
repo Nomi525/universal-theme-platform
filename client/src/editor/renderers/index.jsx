@@ -26,9 +26,9 @@ import TopNav from "./TopNav";
 export const registry = {
   top_nav: TopNav,
   bottom_nav: BottomNav,
-  products_categorized: ProductsCategorized,
+  // products_categorized: ProductsCategorized,
   products_infinite_scroll: ProductsInfiniteScroll,
-  categories_grid: CategoriesGrid,
+  // categories_grid: CategoriesGrid,
   custom_html_block: CustomHtmlBlock,
   static_banner: Banner,
   slider_centered: SliderCentered,
